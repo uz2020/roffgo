@@ -23,6 +23,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -41,6 +43,26 @@ to quickly create a Cobra application.`,
 }
 
 func roffnewRun(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		fmt.Println("post name pls")
+		return
+	}
+
+	baseDir := "content"
+	for _, name := range args {
+		dirName := baseDir + "/" + filepath.Dir(name)
+		pathName := baseDir + "/" + name + ".ms"
+		err := os.MkdirAll(dirName, 0755)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = os.Create(pathName)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 	fmt.Println("roffnew called")
 }
 

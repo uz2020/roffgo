@@ -1,4 +1,6 @@
-all:
+all: build install
+
+build:
 	go build .
 
 install:

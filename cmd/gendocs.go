@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,6 +44,28 @@ to quickly create a Cobra application.`,
 	Run: gendocsRun,
 }
 
+func genIndex(path string) []byte {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		fmt.Println(err, path)
+		return nil
+	}
+
+	content := "<div style='margin: 10% 20%'><ul style='list-style-type: none; font-size: 1.5em;'>"
+	for _, file := range files {
+		name := file.Name()
+		if name == "index.html" {
+			continue
+		}
+		if file.IsDir() {
+			name += "/"
+		}
+		content += fmt.Sprintf("<li style='margin: 10px 0;'><a href='./%s'>%s</a></li>\n", name, name)
+	}
+	content += "</ul></div>"
+	return []byte(content)
+}
+
 func gendocsRun(cmd *cobra.Command, args []string) {
 	contentDir := "content"
 	dirLen := len(contentDir)
@@ -51,28 +74,50 @@ func gendocsRun(cmd *cobra.Command, args []string) {
 			if err != nil {
 				return err
 			}
-			fileName := "docs/" + path[dirLen:]
+			fileName := "docs" + path[dirLen:]
 			ext := filepath.Ext(fileName)
-			fileName = fileName[0:len(fileName)-len(ext)] + ".txt"
 			dirName := filepath.Dir(fileName)
-			if info.IsDir() {
+			var out []byte
+			if !info.IsDir() && ext == ".ms" {
+				fileName = fileName[0:len(fileName)-len(ext)] + ".txt"
+				out, err = exec.Command("groff", "-Tutf8", "-k", path).Output()
+				if err != nil {
+					return err
+				}
+			}
+
+			if len(out) == 0 {
 				return nil
-			} else {
-				os.MkdirAll(dirName, 0755)
-				out, err := exec.Command("nroff", path).Output()
-				if err != nil {
-					return err
-				}
-				err = os.WriteFile(fileName, out, 0755)
-				if err != nil {
-					return err
-				}
+			}
+
+			os.MkdirAll(dirName, 0755)
+
+			err = os.WriteFile(fileName, out, 0644)
+			if err != nil {
+				return err
 			}
 			return nil
 		})
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	dir := "docs"
+	err = filepath.Walk(dir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !info.IsDir() {
+				return nil
+			}
+
+			out := genIndex(path)
+			path += "/index.html"
+			return os.WriteFile(path, out, 0644)
+		})
+
 }
 
 func init() {
