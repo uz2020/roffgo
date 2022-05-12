@@ -69,7 +69,7 @@ func readFileIfModified(lastMod time.Time) ([]byte, time.Time, error) {
 		return nil, lastMod, nil
 	}
 
-	p, err := exec.Command("groff", "-Tutf8", "-k", filename).Output()
+	p, err := exec.Command("groff", "-ms", "-Tutf8", "-k", filename).Output()
 	if err != nil {
 		return nil, lastMod, err
 	}
