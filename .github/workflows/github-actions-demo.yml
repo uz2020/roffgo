@@ -15,5 +15,5 @@ jobs:
         run: |
           ls ${{ github.workspace }}
           make
-          roffgo
+          echo $GOPATH
       - run: echo "🍏 This job's status is ${{ job.status }}."
