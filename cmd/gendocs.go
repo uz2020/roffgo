@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -44,6 +45,22 @@ to quickly create a Cobra application.`,
 	Run: gendocsRun,
 }
 
+func readFirstLine(path string) string {
+	file, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		text := scanner.Text()
+		if text != "" {
+			return text
+		}
+	}
+	return ""
+}
+
 func genIndex(path string) []byte {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -54,11 +71,17 @@ func genIndex(path string) []byte {
 	content := "<div style='margin: 10% 20%'><ul style='list-style-type: none; font-size: 1.5em;'>"
 	for _, file := range files {
 		name := file.Name()
+		ext := filepath.Ext(name)
 		if name == "index.html" {
 			continue
 		}
 		if file.IsDir() {
 			name += "/"
+		} else if ext == ".txt" {
+			fp := path + "/" + name
+			name = readFirstLine(fp)
+		} else {
+			continue
 		}
 		content += fmt.Sprintf("<li style='margin: 10px 0;'><a href='./%s'>%s</a></li>\n", name, name)
 	}
@@ -118,6 +141,9 @@ func gendocsRun(cmd *cobra.Command, args []string) {
 			return os.WriteFile(path, out, 0644)
 		})
 
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func init() {
