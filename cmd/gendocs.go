@@ -71,6 +71,7 @@ func genIndex(path string) []byte {
 	content := "<div style='margin: 10% 20%'><ul style='list-style-type: none; font-size: 1.5em;'>"
 	for _, file := range files {
 		name := file.Name()
+		link := name
 		ext := filepath.Ext(name)
 		if name == "index.html" {
 			continue
@@ -83,7 +84,7 @@ func genIndex(path string) []byte {
 		} else {
 			continue
 		}
-		content += fmt.Sprintf("<li style='margin: 10px 0;'><a href='./%s'>%s</a></li>\n", name, name)
+		content += fmt.Sprintf("<li style='margin: 10px 0;'><a href='./%s'>%s</a></li>\n", link, name)
 	}
 	content += "</ul></div>"
 	return []byte(content)
