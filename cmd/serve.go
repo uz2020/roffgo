@@ -29,6 +29,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -69,7 +70,10 @@ func readFileIfModified(lastMod time.Time) ([]byte, time.Time, error) {
 		return nil, lastMod, nil
 	}
 
-	p, err := exec.Command("groff", "-ms", "-Tutf8", "-k", filename).Output()
+	ext := filepath.Ext(filename)
+	extCmd := fmt.Sprintf("-%s", ext[1:])
+
+	p, err := exec.Command("groff", extCmd, "-Tutf8", "-k", filename).Output()
 	if err != nil {
 		return nil, lastMod, err
 	}

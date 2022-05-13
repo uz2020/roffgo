@@ -102,9 +102,10 @@ func gendocsRun(cmd *cobra.Command, args []string) {
 			ext := filepath.Ext(fileName)
 			dirName := filepath.Dir(fileName)
 			var out []byte
-			if !info.IsDir() && ext == ".ms" {
+			if !info.IsDir() && (ext == ".ms" || ext == ".mm") {
+				extCmd := fmt.Sprintf("-%s", ext[1:])
 				fileName = fileName[0:len(fileName)-len(ext)] + ".txt"
-				out, err = exec.Command("groff", "-ms", "-Tutf8", "-k", path).Output()
+				out, err = exec.Command("groff", extCmd, "-Tutf8", "-k", path).Output()
 				if err != nil {
 					return err
 				}
