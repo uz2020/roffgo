@@ -227,7 +227,7 @@ const homeHTML = `<!DOCTYPE html>
         <title>WebSocket Example</title>
     </head>
     <body>
-        <pre id="fileData" style="font-size: 1.2em">{{.Data}}</pre>
+        <pre id="fileData">{{.Data}}</pre>
         <script type="text/javascript">
             (function() {
                 var data = document.getElementById("fileData");
