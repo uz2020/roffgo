@@ -61,6 +61,12 @@ func readFirstLine(path string) string {
 	return ""
 }
 
+func orgToTxt(path string) (out []byte, err error) {
+	extCmd := `BEGIN{FS=OFS=" "} {gsub(/\*/, "\t", $1)} 1`
+	out, err = exec.Command("awk", extCmd, path).Output()
+	return
+}
+
 func genIndex(path string) []byte {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -102,10 +108,15 @@ func gendocsRun(cmd *cobra.Command, args []string) {
 			ext := filepath.Ext(fileName)
 			dirName := filepath.Dir(fileName)
 			var out []byte
-			if !info.IsDir() && (ext == ".ms" || ext == ".mm") {
-				extCmd := fmt.Sprintf("-%s", ext[1:])
+			if !info.IsDir() {
 				fileName = fileName[0:len(fileName)-len(ext)] + ".txt"
-				out, err = exec.Command("groff", extCmd, "-Tutf8", "-k", path).Output()
+				switch ext {
+				case ".ms", ".mm":
+					extCmd := fmt.Sprintf("-%s", ext[1:])
+					out, err = exec.Command("groff", extCmd, "-Tutf8", "-k", path).Output()
+				case ".org":
+					out, err = orgToTxt(path)
+				}
 				if err != nil {
 					return err
 				}
