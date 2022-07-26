@@ -28,8 +28,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -70,15 +68,13 @@ func readFileIfModified(lastMod time.Time) ([]byte, time.Time, error) {
 		return nil, lastMod, nil
 	}
 
-	ext := filepath.Ext(filename)
-	extCmd := fmt.Sprintf("-%s", ext[1:])
+	out, err := gendocs(filename)
 
-	p, err := exec.Command("groff", extCmd, "-Tutf8", "-k", filename).Output()
 	if err != nil {
 		return nil, lastMod, err
 	}
 
-	return p, fi.ModTime(), nil
+	return out, fi.ModTime(), nil
 }
 
 func reader(ws *websocket.Conn) {

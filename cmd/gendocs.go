@@ -96,6 +96,21 @@ func genIndex(path string) []byte {
 	return []byte(content)
 }
 
+func gendocs(path string) ([]byte, error) {
+	var err error
+	out := []byte{}
+
+	ext := filepath.Ext(path)
+	switch ext {
+	case ".ms", ".mm":
+		extCmd := fmt.Sprintf("-%s", ext[1:])
+		out, err = exec.Command("groff", extCmd, "-Tutf8", "-k", path).Output()
+	case ".org":
+		out, err = orgToTxt(path)
+	}
+	return out, err
+}
+
 func gendocsRun(cmd *cobra.Command, args []string) {
 	contentDir := "content"
 	dirLen := len(contentDir)
@@ -110,13 +125,7 @@ func gendocsRun(cmd *cobra.Command, args []string) {
 			var out []byte
 			if !info.IsDir() {
 				fileName = fileName[0:len(fileName)-len(ext)] + ".txt"
-				switch ext {
-				case ".ms", ".mm":
-					extCmd := fmt.Sprintf("-%s", ext[1:])
-					out, err = exec.Command("groff", extCmd, "-Tutf8", "-k", path).Output()
-				case ".org":
-					out, err = orgToTxt(path)
-				}
+				out, err = gendocs(path)
 				if err != nil {
 					return err
 				}
