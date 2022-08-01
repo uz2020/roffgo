@@ -67,6 +67,11 @@ func orgToTxt(path string) (out []byte, err error) {
 	return
 }
 
+func txtToTxt(path string) (out []byte, err error) {
+	out, err = ioutil.ReadFile(path)
+	return
+}
+
 func genIndex(path string) []byte {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -107,6 +112,8 @@ func gendocs(path string) ([]byte, error) {
 		out, err = exec.Command("groff", extCmd, "-Tutf8", "-k", path).Output()
 	case ".org":
 		out, err = orgToTxt(path)
+	case ".txt":
+		out, err = txtToTxt(path)
 	}
 	return out, err
 }
