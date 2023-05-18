@@ -115,6 +115,9 @@ func gendocs(path string) ([]byte, error) {
 	case ".txt":
 		out, err = txtToTxt(path)
 	}
+	if err != nil {
+		fmt.Println("------------- err", err, path)
+	}
 	return out, err
 }
 
@@ -134,6 +137,7 @@ func gendocsRun(cmd *cobra.Command, args []string) {
 				fileName = fileName[0:len(fileName)-len(ext)] + ".txt"
 				out, err = gendocs(path)
 				if err != nil {
+					fmt.Println("------------", err)
 					return err
 				}
 			}
